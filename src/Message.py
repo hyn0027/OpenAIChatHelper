@@ -1,4 +1,7 @@
 from typing import Dict, Optional, Literal
+import copy
+
+from .SubstitutionDict import SubstitutionDict
 
 
 class Message:
@@ -89,16 +92,27 @@ class Message:
                 }
             )
 
-    def to_dict(self) -> Dict:
+    def to_dict(self, substitution_dict: Optional[SubstitutionDict] = None) -> Dict:
         """Convert the message object to a dictionary
+
+        Args:
+            substitution_dict (Optional[SubstitutionDict], optional): The substitution dictionary to replace the placeholders in the message. Defaults to None.
 
         Returns:
             Dict: The dictionary representation of the message
         """
-
+        content_copy = copy.deepcopy(self._content)
+        if substitution_dict is not None:
+            for item in content_copy:
+                if item["type"] == "text":
+                    item["text"] = item["text"].format_map(substitution_dict)
         if self._name is None:
-            return {"role": self._role, "content": self._content}
-        return {"role": self._role, "content": self._content, "name": self._name}
+            return {"role": self._role, "content": content_copy}
+        return {
+            "role": self._role,
+            "content": content_copy,
+            "name": self._name.format_map(substitution_dict),
+        }
 
     def __repr__(self):
         if self._name is None:
@@ -115,7 +129,9 @@ class Message:
                         f"\033[36mImage URL ({item['image_url']['detail']}): {item['image_url']['url'][:15]}...\033[0m"
                     )
                 else:
-                    content.append(f"\033[36mImage URL: {item['image_url']['url'][:15]}...\033[0m")
+                    content.append(
+                        f"\033[36mImage URL: {item['image_url']['url'][:15]}...\033[0m"
+                    )
             elif item["type"] == "input_audio":
                 content.append(
                     f"\033[36mAudio ({item['input_audio']['format']}): {item['input_audio']['data'][:15]}...\033[0m"

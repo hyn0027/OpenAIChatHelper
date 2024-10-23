@@ -1,5 +1,7 @@
 from typing import Optional, Dict, Literal, List
-from Message import Message
+
+from .Message import Message
+from .SubstitutionDict import SubstitutionDict
 
 
 class MessageList:
@@ -62,13 +64,13 @@ class MessageList:
 
     def add_assistant_message(
         self,
+        content: Optional[Dict] = None,
         text_content: Optional[str] = None,
         image_url: Optional[str] = None,
         image_details: Optional[Literal["low", "high", "auto"]] = None,
         audio_data: Optional[str] = None,
         audio_format: Optional[Literal["mp3", "wav"]] = None,
         name: Optional[str] = None,
-        content: Optional[Dict] = None,
     ) -> None:
         """add an assistant message to the message list
 
@@ -153,19 +155,22 @@ class MessageList:
             raise ValueError("Not enough messages to pop")
         return [self._messages.pop() for _ in range(repeat)]
 
-    def to_dict(self) -> Dict:
+    def to_dict(self, substitution_dict: Optional[SubstitutionDict] = None) -> Dict:
         """Convert the message list to a dictionary
+
+        Args:
+            substitution_dict (Optional[SubstitutionDict], optional): The substitution dictionary for the message content. Defaults to None.
 
         Returns:
             Dict: The dictionary representation of the message list
         """
 
         if self._system_message:
-            return [self._system_message.to_dict()] + [
-                message.to_dict() for message in self._messages
+            return [self._system_message.to_dict(substitution_dict)] + [
+                message.to_dict(substitution_dict) for message in self._messages
             ]
         else:
-            return [message.to_dict() for message in self._messages]
+            return [message.to_dict(substitution_dict) for message in self._messages]
 
     def __repr__(self):
         if self._system_message:
