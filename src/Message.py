@@ -10,7 +10,7 @@ class Content:
         Convert the content to a dictionary format.
 
         Args:
-            substitution_dict (Optional[SubstitutionDict]): A dictionary for substituting values 
+            substitution_dict (Optional[SubstitutionDict]): A dictionary for substituting values
             within the content.
 
         Returns:
@@ -31,7 +31,7 @@ class Content:
 class TextContent(Content):
     """
     Represents textual content.
-    
+
     Attributes:
         _text (str): The text content.
     """
@@ -55,7 +55,7 @@ class TextContent(Content):
         Convert the text content to a dictionary format.
 
         Args:
-            substitution_dict (Optional[SubstitutionDict]): A dictionary for substituting values 
+            substitution_dict (Optional[SubstitutionDict]): A dictionary for substituting values
             within the text.
 
         Returns:
@@ -76,7 +76,7 @@ class TextContent(Content):
 class ImageContent(Content):
     """
     Represents image content with a URL and optional detail level.
-    
+
     Attributes:
         _image_url (str): The URL of the image.
         _image_details (Optional[str]): Detail level of the image ('low', 'high', 'auto').
@@ -111,7 +111,7 @@ class ImageContent(Content):
         Convert the image content to a dictionary format.
 
         Args:
-            substitution_dict (Optional[SubstitutionDict]): A dictionary for substituting values 
+            substitution_dict (Optional[SubstitutionDict]): A dictionary for substituting values
             within the image URL.
 
         Returns:
@@ -136,7 +136,7 @@ class ImageContent(Content):
 class AudioContent(Content):
     """
     Represents audio content with data and format.
-    
+
     Attributes:
         _audio_data (str): The audio data.
         _audio_format (str): The format of the audio ('mp3' or 'wav').
@@ -169,7 +169,7 @@ class AudioContent(Content):
         Convert the audio content to a dictionary format.
 
         Args:
-            substitution_dict (Optional[SubstitutionDict]): A dictionary for substituting values 
+            substitution_dict (Optional[SubstitutionDict]): A dictionary for substituting values
             within the audio data.
 
         Returns:
@@ -194,7 +194,7 @@ class AudioContent(Content):
 
 class Message:
     """A single message entry in a conversation.
-    
+
     Attributes:
         _role (str): The role of the message sender ('user', 'assistant', 'system').
         _content (List[Content]): The list of content objects.
@@ -228,6 +228,11 @@ class Message:
 
         if not content:
             raise ValueError("Message must have content")
+        if not isinstance(content, list):
+            raise ValueError("Content must be a list")
+        for item in content:
+            if not isinstance(item, Content):
+                raise ValueError("Content items must be Content objects")
         if role == "system":
             if len(content) != 1 or not isinstance(content[0], TextContent):
                 raise ValueError(
@@ -241,7 +246,7 @@ class Message:
         Convert the message object to a dictionary format.
 
         Args:
-            substitution_dict (Optional[SubstitutionDict]): A dictionary for substituting values 
+            substitution_dict (Optional[SubstitutionDict]): A dictionary for substituting values
             within the message content.
 
         Returns:

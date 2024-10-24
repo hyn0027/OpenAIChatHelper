@@ -1,14 +1,38 @@
 class SubstitutionDict(dict):
-    """Dict where key and value must be string. Dynamic checking enforced"""
+    """
+    A dictionary that only allows string keys and values.
+    """
 
     def __setitem__(self, key: str, value: str) -> None:
-        if type(key) != str:
-            raise ValueError("key must be a string")
-        if type(value) != str:
-            raise ValueError("value must be a string")
+        """
+        Set a string key-value pair.
+
+        Args:
+            key (str): The dictionary key.
+            value (str): The associated value.
+
+        Raises:
+            ValueError: If `key` or `value` is not a string.
+        """
+        if not isinstance(key, str):
+            raise ValueError("Key must be a string")
+        if not isinstance(value, str):
+            raise ValueError("Value must be a string")
         super().__setitem__(key, value)
 
     def __getitem__(self, key: str) -> str:
-        if type(key) != str:
-            raise ValueError("key must be a string")
+        """
+        Get the value for a string key.
+
+        Args:
+            key (str): The dictionary key.
+
+        Raises:
+            ValueError: If `key` is not a string.
+
+        Returns:
+            str: The associated value.
+        """
+        if not isinstance(key, str):
+            raise ValueError("Key must be a string")
         return super().__getitem__(key)

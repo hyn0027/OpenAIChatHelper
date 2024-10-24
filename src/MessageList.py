@@ -17,20 +17,20 @@ class MessageList:
         return len(self._messages)
 
     def set_system_prompt(
-        self, text_content: Union[TextContent, str], name: Optional[str] = None
+        self, content: Union[TextContent, str], name: Optional[str] = None
     ) -> None:
         """Set the system prompt message.
 
         Args:
-            text_content (Union[TextContent, str]): The content of the system prompt.
+            content (Union[TextContent, str]): The content of the system prompt.
             name (Optional[str], optional): An optional name for the system. Defaults to None.
 
         Raises:
-            ValueError: If `text_content` is not a string or `TextContent` object.
+            ValueError: If `content` is not a string or `TextContent` object.
         """
-        if not isinstance(text_content, (str, TextContent)):
-            raise ValueError("text_content must be a string or TextContent")
-        self._system_message = Message("system", text_content, name=name)
+        if not isinstance(content, (str, TextContent)):
+            raise ValueError("content must be a string or TextContent")
+        self._system_message = Message("system", [content], name=name)
 
     def unset_system_prompt(self) -> None:
         """Remove the system prompt message."""
@@ -38,35 +38,57 @@ class MessageList:
 
     def add_user_message(
         self,
-        content: List[Content],
+        content: Union[List[Content], Content],
         name: Optional[str] = None,
     ) -> None:
         """Add a user message to the message list.
 
         Args:
-            content (List[Content]): The content of the user message.
+            content (Union[List[Content], Content]): The content of the user message.
             name (Optional[str], optional): An optional name for the user. Defaults to None.
         """
+        if isinstance(content, Content):
+            content = [content]
         self._messages.append(Message("user", content, name))
 
     def add_assistant_message(
         self,
-        content: List[Content],
+        content: Union[List[Content], Content],
         name: Optional[str] = None,
     ) -> None:
         """Add an assistant message to the message list.
 
         Args:
-            content (List[Content]): The content of the assistant message.
+            content (Union[List[Content], Content]): The content of the assistant message.
             name (Optional[str], optional): An optional name for the assistant. Defaults to None.
         """
+        if isinstance(content, Content):
+            content = [content]
         self._messages.append(Message("assistant", content, name))
+
+    def add_message(
+        self,
+        message: Message,
+    ) -> None:
+        """Add a message to the message list.
+
+        Args:
+            message (Message): The message to add.
+
+        Raises:
+            ValueError: If the message role is not 'user' or 'assistant'.
+        """
+        if message.role not in {"user", "assistant"}:
+            raise ValueError("Invalid role; must be 'user' or 'assistant'")
+        if not isinstance(message, Message):
+            raise ValueError("message must be a Message object")
+        self._messages.append(message)
 
     def modify_message(
         self,
         index: int,
         role: Literal["user", "assistant"],
-        content: List[Content],
+        content: Union[List[Content], Content],
         name: Optional[str] = None,
     ) -> None:
         """Modify a message at a specific index.
@@ -74,7 +96,7 @@ class MessageList:
         Args:
             index (int): The index of the message to modify.
             role (Literal["user", "assistant"]): The role of the message.
-            content (List[Content]): The new content for the message.
+            content (Union[List[Content], Content]): The new content for the message.
             name (Optional[str], optional): An optional name for the message. Defaults to None.
 
         Raises:
@@ -84,6 +106,8 @@ class MessageList:
             raise ValueError("Index out of range")
         if role not in {"user", "assistant"}:
             raise ValueError("Invalid role; must be 'user' or 'assistant'")
+        if isinstance(content, Content):
+            content = [content]
         self._messages[index] = Message(role, content, name)
 
     def modify_message_with_object(self, index: int, message: Message) -> None:
@@ -148,7 +172,7 @@ class MessageList:
         messages.extend(
             message.to_dict(substitution_dict) for message in self._messages
         )
-        return messages
+        return {"messages": messages}
 
     def __repr__(self):
         """Return a string representation of the message list."""
