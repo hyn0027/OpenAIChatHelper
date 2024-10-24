@@ -19,10 +19,9 @@ def init():
 
 init()
 
-__version__ = "0.1.0"
+__version__ = "0.1.0-alpha"
 __all__ = [
-    "Content"
-    "TextContent",
+    "Content" "TextContent",
     "ImageContent",
     "AudioContent",
     "Message",

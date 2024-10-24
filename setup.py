@@ -1,8 +1,8 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="OpenAI-Helper",
-    version="0.1.0",
+    name="OpenAIHelper",
+    version="0.1.0-alpha",
     description="A helper package for OpenAI API",
     author="Yining Hong",
     author_email="yhong3@andrew.cmu.edu",
