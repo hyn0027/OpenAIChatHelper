@@ -1,6 +1,6 @@
-from typing import Optional, Dict, Literal, List
+from typing import Optional, Dict, Literal, List, Union
 
-from .Message import Message
+from .Message import Message, AudioContent, ImageContent, TextContent
 from .SubstitutionDict import SubstitutionDict
 
 
@@ -14,15 +14,13 @@ class MessageList:
     def __len__(self):
         return len(self._messages)
 
-    def set_system_prompt(self, text_content: str, name: Optional[str] = None) -> None:
-        """Set the system prompt message
-
-        Args:
-            text_content (str): The text_content of the system prompt message
-            name (str, optional): The name of the system prompt message. Defaults to None.
-        """
-        if type(text_content) != str:
-            raise ValueError("text_content must be a string")
+    def set_system_prompt(
+        self, text_content: Union[TextContent, str], name: Optional[str] = None
+    ) -> None:
+        if not isinstance(text_content, str) and not isinstance(
+            text_content, TextContent
+        ):
+            raise ValueError("text_content must be a string or TextContent")
         if name is not None and type(name) != str:
             raise ValueError("name must be a string")
         self._system_message = Message("system", text_content, name=name)
