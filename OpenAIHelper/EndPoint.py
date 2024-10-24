@@ -1,7 +1,8 @@
+import os
 from typing import Optional
 from openai import OpenAI
 
-from .utils.log import get_logger
+from .utils.Logging import get_logger
 
 logger = get_logger(__name__)
 
@@ -38,11 +39,32 @@ class EndPoint:
             organization (Optional[str]): The organization ID. Defaults to None.
             project_id (Optional[str]): The project ID. Defaults to None.
         """
+        self.verify_openai_api_key()
         if organization is not None:
             self.__organization__ = organization
         if project_id is not None:
             self.__project_id__ = project_id
         self._client = self.get_client()
+
+    @classmethod
+    def verify_openai_api_key() -> None:
+        """
+        Verify that the OpenAI API key is set and non-empty in the environment variables.
+
+        This function checks if the environment variable `OPENAI_API_KEY` exists and ensures
+        that it is not empty. If the environment variable is not set or is empty, it raises
+        a `ValueError` with an appropriate message.
+
+        Raises:
+            ValueError: If `OPENAI_API_KEY` is not set or is an empty string.
+        """
+        # verify $OPENAI_API_KEY is set
+        if "OPENAI_API_KEY" not in os.environ:
+            raise ValueError("Please set the OPENAI_API_KEY environment variable")
+
+        # verify $OPENAI_API_KEY is not empty
+        if os.environ["OPENAI_API_KEY"] == "" or os.environ["OPENAI_API_KEY"] is None:
+            raise ValueError("OPENAI_API_KEY is empty")
 
     @classmethod
     def set_organization(cls, organization: Optional[str]):
