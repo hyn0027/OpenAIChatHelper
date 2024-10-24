@@ -59,17 +59,19 @@ class AudioContent(Content):
             raise ValueError("Audio data must be a string")
         if audio_format not in {"mp3", "wav"}:
             raise ValueError("Invalid audio format; must be 'mp3' or 'wav'")
-        self.audio_data = audio_data
-        self.audio_format = audio_format
+        self._audio_data = audio_data
+        self._audio_format = audio_format
 
     def to_dict(self, substitution_dict: Optional[SubstitutionDict] = None) -> Dict:
         return {
             "type": "input_audio",
-            "input_audio": {"data": self.audio_data, "format": self.audio_format},
+            "input_audio": {"data": self._audio_data, "format": self._audio_format},
         }
 
     def __repr__(self):
-        return f"\033[36mAudio ({self.audio_format}):\033[0m {self.audio_data[:15]}..."
+        return (
+            f"\033[36mAudio ({self._audio_format}):\033[0m {self._audio_data[:15]}..."
+        )
 
 
 class Message:
@@ -83,20 +85,19 @@ class Message:
     ):
         if role not in {"user", "assistant", "system"}:
             raise ValueError(f"Invalid role: {role}")
+        if not isinstance(name, str) and name is not None:
+            raise ValueError("name must be a string")
 
         self._role = role
         self._name = name
 
-        if isinstance(text_content, str):
-            text_content = TextContent(text_content)
-
-        if len(content) == 0:
+        if not content:
             raise ValueError("Message must have content")
         if role == "system":
-            if len(content) != 1:
-                raise ValueError("System messages must have exactly one content item")
-            if not isinstance(content[0], TextContent):
-                raise ValueError("System messages must have text content")
+            if len(content) != 1 or not isinstance(content[0], TextContent):
+                raise ValueError(
+                    "System messages must have exactly one text content item"
+                )
 
         self._content = content
 
