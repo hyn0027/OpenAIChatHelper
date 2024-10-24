@@ -12,12 +12,3 @@ class SubstitutionDict(dict):
         if type(key) != str:
             raise ValueError("key must be a string")
         return super().__getitem__(key)
-
-
-# a = "{test} a test"
-# print(a)
-# dict = SubstitutionDict()
-# dict["test"] = "This is"
-# print(dict)
-# a = a.format_map(dict)
-# print(a)
