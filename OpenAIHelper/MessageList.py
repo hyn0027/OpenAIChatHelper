@@ -30,6 +30,8 @@ class MessageList:
         """
         if not isinstance(content, (str, TextContent)):
             raise ValueError("content must be a string or TextContent")
+        if isinstance(content, str):
+            content = TextContent(content)
         self._system_message = Message("system", [content], name=name)
 
     def unset_system_prompt(self) -> None:
@@ -155,14 +157,16 @@ class MessageList:
             raise ValueError("Not enough messages to pop")
         return [self._messages.pop() for _ in range(repeat)]
 
-    def to_dict(self, substitution_dict: Optional[SubstitutionDict] = None) -> Dict:
+    def to_dict(
+        self, substitution_dict: Optional[SubstitutionDict] = None
+    ) -> List[Dict]:
         """Convert the message list to a dictionary.
 
         Args:
             substitution_dict (Optional[SubstitutionDict], optional): The substitution dictionary for the message content. Defaults to None.
 
         Returns:
-            Dict: The dictionary representation of the message list.
+            List[Dict]: The message list as a list of dictionaries.
         """
         messages = (
             [self._system_message.to_dict(substitution_dict)]
@@ -172,7 +176,7 @@ class MessageList:
         messages.extend(
             message.to_dict(substitution_dict) for message in self._messages
         )
-        return {"messages": messages}
+        return messages
 
     def __repr__(self):
         """Return a string representation of the message list."""

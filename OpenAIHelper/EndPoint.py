@@ -29,6 +29,9 @@ class EndPoint:
             Resets the OpenAI client instance using the current configuration.
     """
 
+    __organization__: Optional[str] = None
+    __project_id__: Optional[str] = None
+
     def __init__(
         self, organization: Optional[str] = None, project_id: Optional[str] = None
     ):
@@ -39,7 +42,7 @@ class EndPoint:
             organization (Optional[str]): The organization ID. Defaults to None.
             project_id (Optional[str]): The project ID. Defaults to None.
         """
-        self.verify_openai_api_key()
+        EndPoint.verify_openai_api_key()
         if organization is not None:
             self.__organization__ = organization
         if project_id is not None:
@@ -47,7 +50,7 @@ class EndPoint:
         self._client = self.get_client()
 
     @classmethod
-    def verify_openai_api_key() -> None:
+    def verify_openai_api_key(cls) -> None:
         """
         Verify that the OpenAI API key is set and non-empty in the environment variables.
 

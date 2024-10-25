@@ -1,7 +1,9 @@
-from typing import Dict, Optional
+from typing import Optional
 from .EndPoint import EndPoint
+from .Message import Message, TextContent
 from .MessageList import MessageList
 from .SubstitutionDict import SubstitutionDict
+
 
 class ChatCompletion(EndPoint):
     """
@@ -38,7 +40,7 @@ class ChatCompletion(EndPoint):
         substitution_dict: Optional[SubstitutionDict] = None,
         model: Optional[str] = None,
         **kwargs,
-    ) -> Dict:
+    ) -> Message:
         """
         Generate chat completions using the provided messages and optional substitutions.
 
@@ -49,11 +51,14 @@ class ChatCompletion(EndPoint):
             **kwargs: Additional arguments to pass to the chat completions API.
 
         Returns:
-            Dict: The response from the chat completions API.
+            Message: The generated chat completion.
         """
         if model is None:
             model = self._default_model
         response = self._client.chat.completions.create(
             model=model, messages=messages.to_dict(substitution_dict), **kwargs
         )
-        return response
+        return Message(
+            response.choices[0].message.role,
+            [TextContent(response.choices[0].message.content)],
+        )

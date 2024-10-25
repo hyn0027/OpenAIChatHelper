@@ -1,5 +1,7 @@
+import re
 from typing import Dict, Optional, Literal, List
 from .SubstitutionDict import SubstitutionDict
+from .utils.StringOperations import remove_markdown, split_ordered_list
 
 
 class Content:
@@ -70,7 +72,34 @@ class TextContent(Content):
         Returns:
             str: The string representation of the text content.
         """
-        return f"\033[36mText:\033[0m {self._text}"
+        return f"\033[36mText:\033[0m {self._text}".replace("\n", "\n" + " " * 6)
+
+    def split_ordered_list(
+        self, remove_markdown_option: Optional[bool] = True, **kwargs
+    ) -> List[str]:
+        """
+        Split the text content into an ordered list.
+
+        Args:
+            remove_markdown (Optional[bool]): Whether to remove markdown formatting from the text content.
+            **kwargs: Additional arguments to pass to the `split_ordered_list` function.
+
+        Returns:
+            List[str]: The ordered list of text items.
+        """
+        return split_ordered_list(self._text, remove_markdown_option, **kwargs)
+
+    def remove_markdown(self, **kwargs) -> str:
+        """
+        Remove markdown formatting from the text content.
+
+        Args:
+            **kwargs: Additional arguments to pass to the `remove_markdown` function.
+
+        Returns:
+            str: The text content without markdown.
+        """
+        return remove_markdown(self._text, **kwargs)
 
 
 class ImageContent(Content):
@@ -260,7 +289,7 @@ class Message:
             message_dict["name"] = self._name.format_map(substitution_dict)
         return message_dict
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """
         Return a string representation of the message.
 
@@ -268,5 +297,27 @@ class Message:
             str: The string representation of the message.
         """
         heading = f"{self._role} ({self._name}): " if self._name else f"{self._role}: "
-        content = ("\n" + " " * len(heading)).join(str(item) for item in self._content)
+        content = "\n".join(str(item) for item in self._content)
+        content = content.replace("\n", "\n" + " " * len(heading))
         return f"\033[34m{heading}\033[0m{content}"
+
+    def __len__(self) -> int:
+        """
+        Return the number of content items in the message.
+
+        Returns:
+            int: The number of content items.
+        """
+        return len(self._content)
+
+    def __getitem__(self, index: int) -> Content:
+        """
+        Return the content item at the specified index.
+
+        Args:
+            index (int): The index of the content item.
+
+        Returns:
+            Content: The content item at the specified index.
+        """
+        return self._content[index]
