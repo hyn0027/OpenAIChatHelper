@@ -92,7 +92,7 @@ def enable_all_loggers():
         enable_logger(logger)
 
 
-def set_logging_level(logger: Union[str, logging.Logger], level: Union[int, str]):
+def set_logger_level(logger: Union[str, logging.Logger], level: Union[int, str]):
     """Set the logging level for a logger.
 
     Args:
@@ -107,14 +107,14 @@ def set_logging_level(logger: Union[str, logging.Logger], level: Union[int, str]
             handler.setLevel(level)
 
 
-def set_all_logging_levels(level: Union[int, str]):
+def set_all_loggers_levels(level: Union[int, str]):
     """Set the logging level for all loggers.
 
     Args:
         level (Union[int, str]): The verbose level.
     """
     for logger in _loggers.values():
-        set_logging_level(logger, level)
+        set_logger_level(logger, level)
 
 
 def set_default_logging_level(level: Union[int, str]):
@@ -125,4 +125,4 @@ def set_default_logging_level(level: Union[int, str]):
     """
     global _default_logging_level
     _default_logging_level = level
-    set_all_logging_levels(level)
+    set_all_loggers_levels(level)
