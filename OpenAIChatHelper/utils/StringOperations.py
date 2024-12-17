@@ -78,4 +78,5 @@ def split_ordered_list(
             current_string += "\n" + line
     if current_string:
         ordered_list.append(current_string)
+    ordered_list = [item for item in ordered_list if item != ""]
     return ordered_list

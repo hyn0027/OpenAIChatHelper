@@ -101,6 +101,15 @@ class TextContent(Content):
         """
         return remove_markdown(self._text, **kwargs)
 
+    def get_text(self) -> str:
+        """
+        Return the text content.
+
+        Returns:
+            str: The text content.
+        """
+        return self._text
+
 
 class ImageContent(Content):
     """
