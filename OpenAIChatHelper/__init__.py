@@ -1,8 +1,10 @@
+from .Contents import *
 from .Message import *
-from .MessageList import MessageList
-from .ChatCompletion import ChatCompletion
-from .SubstitutionDict import SubstitutionDict
-from .Config import set_default_authorization
+
+# from .MessageList import MessageList
+# from .ChatCompletion import ChatCompletion
+# from .SubstitutionDict import SubstitutionDict
+# from .Config import set_default_authorization
 from .utils import *
 
 
@@ -13,9 +15,11 @@ __all__ = [
     "ImageContent",
     "AudioContent",
     "Message",
-    "MessageList",
-    "ChatCompletion",
-    "SubstitutionDict",
-    "set_default_authorization",
+    "SystemAndUserMessage",
+    "AssistantMessage",
+    # "MessageList",
+    # "ChatCompletion",
+    # "SubstitutionDict",
+    # "set_default_authorization",
     "utils",
 ]
