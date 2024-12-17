@@ -2,6 +2,10 @@ from typing import List, Iterable
 from markdown_it import MarkdownIt
 from mdformat.renderer import MDRenderer
 
+from .Logging import get_logger
+
+logger = get_logger(__name__)
+
 
 def remove_markdown(
     text: str,
@@ -35,29 +39,34 @@ def remove_markdown(
                 f"Invalid remove type: {remove_type}, must be one of {list(markdown_match.keys())}"
             )
 
-    def traverse_ast_tree(node):
-        for remove_type in remove_types:
-            if node.type in markdown_match[remove_type]:
-                return None
-        new_children = []
-        if node.children:
-            for child in node.children:
-                new_child = traverse_ast_tree(child)
-                if new_child:
-                    new_children.append(new_child)
-        node.children = new_children
-        return node
+    try:
 
-    md = MarkdownIt()
-    tokens = []
-    for token in md.parse(text):
-        new_token = traverse_ast_tree(token)
-        if new_token:
-            tokens.append(new_token)
+        def traverse_ast_tree(node):
+            for remove_type in remove_types:
+                if node.type in markdown_match[remove_type]:
+                    return None
+            new_children = []
+            if node.children:
+                for child in node.children:
+                    new_child = traverse_ast_tree(child)
+                    if new_child:
+                        new_children.append(new_child)
+            node.children = new_children
+            return node
 
-    renderer = MDRenderer()
-    output_markdown = renderer.render(tokens, {}, {})
-    return output_markdown
+        md = MarkdownIt()
+        tokens = []
+        for token in md.parse(text):
+            new_token = traverse_ast_tree(token)
+            if new_token:
+                tokens.append(new_token)
+
+        renderer = MDRenderer()
+        output_markdown = renderer.render(tokens, {}, {})
+        return output_markdown
+    except Exception as e:
+        logger.error(f"Error removing markdown: {e}")
+        return text
 
 
 def split_ordered_list(
@@ -73,44 +82,48 @@ def split_ordered_list(
 ) -> List[str]:
     text = remove_markdown(text, remove_markdown_types, **kwargs)
 
-    order_list_count = 0
-    order_list_open_idx = -1
-    order_list_close_idx = -1
+    try:
+        order_list_count = 0
+        order_list_open_idx = -1
+        order_list_close_idx = -1
 
-    md = MarkdownIt()
-    tokens = md.parse(text)
-    for idx, token in enumerate(tokens):
-        if token.type == "ordered_list_open":
-            order_list_count += 1
-            if order_list_open_idx == -1:
-                order_list_open_idx = idx
-        if token.type == "ordered_list_close":
-            order_list_count -= 1
-            if order_list_count == 0:
-                order_list_close_idx = idx
-                break
+        md = MarkdownIt()
+        tokens = md.parse(text)
+        for idx, token in enumerate(tokens):
+            if token.type == "ordered_list_open":
+                order_list_count += 1
+                if order_list_open_idx == -1:
+                    order_list_open_idx = idx
+            if token.type == "ordered_list_close":
+                order_list_count -= 1
+                if order_list_count == 0:
+                    order_list_close_idx = idx
+                    break
 
-    tokens = tokens[order_list_open_idx : order_list_close_idx + 1]
+        tokens = tokens[order_list_open_idx : order_list_close_idx + 1]
 
-    res = []
-    renderer = MDRenderer()
+        res = []
+        renderer = MDRenderer()
 
-    list_item_count = 0
-    list_item_open_idx = -1
-    for idx, token in enumerate(tokens):
-        if token.type == "list_item_open":
-            list_item_count += 1
-            if list_item_open_idx == -1:
-                list_item_open_idx = idx
-        if token.type == "list_item_close":
-            list_item_count -= 1
-            if list_item_count == 0:
-                list_item_close_idx = idx
-                res.append(
-                    renderer.render(
-                        tokens[list_item_open_idx + 1 : list_item_close_idx], {}, {}
+        list_item_count = 0
+        list_item_open_idx = -1
+        for idx, token in enumerate(tokens):
+            if token.type == "list_item_open":
+                list_item_count += 1
+                if list_item_open_idx == -1:
+                    list_item_open_idx = idx
+            if token.type == "list_item_close":
+                list_item_count -= 1
+                if list_item_count == 0:
+                    list_item_close_idx = idx
+                    res.append(
+                        renderer.render(
+                            tokens[list_item_open_idx + 1 : list_item_close_idx], {}, {}
+                        )
                     )
-                )
-                list_item_open_idx = -1
+                    list_item_open_idx = -1
 
-    return res
+        return res
+    except Exception as e:
+        logger.error(f"Error splitting ordered list: {e}")
+        return [text]
