@@ -63,10 +63,17 @@ def disable_logger(logger: Union[str, logging.Logger]) -> bool:
     return False
 
 
-def disable_all_loggers():
-    """disable_all_loggers."""
+def disable_all_loggers() -> bool:
+    """Disable all loggers.
+
+    Returns:
+        bool: True if all loggers were disabled, False otherwise.
+    """
+    res = True
     for logger in _loggers.values():
-        disable_logger(logger)
+        if not disable_logger(logger):
+            res = False
+    return res
 
 
 def enable_logger(logger: Union[str, logging.Logger]) -> bool:
@@ -86,18 +93,30 @@ def enable_logger(logger: Union[str, logging.Logger]) -> bool:
     return False
 
 
-def enable_all_loggers():
-    """Enable all loggers."""
+def enable_all_loggers() -> bool:
+    """Enable all loggers.
+
+    Returns:
+        bool: True if all loggers were enabled, False otherwise.
+    """
+    res = True
     for logger in _loggers.values():
-        enable_logger(logger)
+        if not enable_logger(logger):
+            res = False
+    return res
 
 
-def set_logger_level(logger: Union[str, logging.Logger], level: Union[int, str]):
+def set_logger_level(
+    logger: Union[str, logging.Logger], level: Union[int, str]
+) -> bool:
     """Set the logging level for a logger.
 
     Args:
         logger (Union[str, logging.Logger]): The logger to set the level for.
         level (Union[int, str]): The verbose level.
+
+    Returns:
+        bool: True if the logger level was set, False otherwise
     """
     if isinstance(logger, str):
         logger = _loggers.get(logger)
@@ -105,24 +124,35 @@ def set_logger_level(logger: Union[str, logging.Logger], level: Union[int, str])
         logger.setLevel(level)
         for handler in logger.handlers:
             handler.setLevel(level)
+        return True
+    return False
 
 
-def set_all_loggers_levels(level: Union[int, str]):
+def set_all_loggers_levels(level: Union[int, str]) -> bool:
     """Set the logging level for all loggers.
 
     Args:
         level (Union[int, str]): The verbose level.
+
+    Returns:
+        bool: True if all loggers levels were set, False otherwise
     """
+    res = True
     for logger in _loggers.values():
-        set_logger_level(logger, level)
+        if not set_logger_level(logger, level):
+            res = False
+    return res
 
 
-def set_default_logging_level(level: Union[int, str]):
+def set_default_logging_level(level: Union[int, str]) -> bool:
     """Set the default logging level.
 
     Args:
         level (Union[int, str]): The verbose level.
+
+    Returns:
+        bool: True if the default logging level was set, False otherwise
     """
     global _default_logging_level
     _default_logging_level = level
-    set_all_loggers_levels(level)
+    return set_all_loggers_levels(level)

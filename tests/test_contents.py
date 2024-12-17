@@ -34,4 +34,3 @@ def test_text_content():
 
     # assert __repr__ is implemented
     repr(content)
-

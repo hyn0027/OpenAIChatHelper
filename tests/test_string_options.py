@@ -23,7 +23,9 @@ def test_remove_markdown_with_option():
 
 
 def test_split_markdown_ordered_list():
-    text = "1. **item 1**\n    1. *item 1.1*\n    2. item 1.2\n2. ***item 2***\n3. item 3"
+    text = (
+        "1. **item 1**\n    1. *item 1.1*\n    2. item 1.2\n2. ***item 2***\n3. item 3"
+    )
     splitted_list = split_ordered_list(text)
     assert len(splitted_list) == 3
     assert splitted_list[0] == "item 1\n\n1. item 1.1\n1. item 1.2\n"
