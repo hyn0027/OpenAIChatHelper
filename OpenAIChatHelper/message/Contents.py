@@ -181,3 +181,37 @@ class AudioContent(Content):
         return (
             f"\033[36mAudio ({self._audio_format}):\033[0m {self._audio_data[:15]}..."
         )
+
+
+class RefusalContent(Content):
+    """Represents refusal content."""
+
+    def __init__(self, refusal: str):
+        """
+        Initialize RefusalContent.
+
+        Args:
+            refusal (str): The refusal message.
+
+        Raises:
+            ValueError: If `refusal` is not a string.
+        """
+        super().__init__("refusal")
+        if not isinstance(refusal, str):
+            raise ValueError("Refusal must be a string")
+        self._refusal = refusal
+
+    @property
+    def refusal(self) -> str:
+        return self._refusal
+
+    def to_dict(
+        self, substitution_dict: Optional[SubstitutionDict] = SubstitutionDict()
+    ) -> Dict:
+        return {
+            "type": "refusal",
+            "refusal": self._refusal.format_map(substitution_dict),
+        }
+
+    def __repr__(self):
+        return f"\033[36mRefusal:\033[0m {self._refusal}".replace("\n", "\n" + " " * 9)
