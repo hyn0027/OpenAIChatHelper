@@ -9,7 +9,7 @@ from .utils import get_logger
 logger = get_logger(__name__)
 
 
-class ChatCompletion(EndPoint):
+class ChatCompletionEndPoint(EndPoint):
     """
     A class to handle chat completions using a specified model.
 
@@ -28,7 +28,7 @@ class ChatCompletion(EndPoint):
         project_id: Optional[str] = None,
     ):
         """
-        Initialize the ChatCompletion instance with a default model, organization, and project ID.
+        Initialize the ChatCompletionEndPoint instance with a default model, organization, and project ID.
 
         Args:
             default_model (str): The default model to use for chat completions.
