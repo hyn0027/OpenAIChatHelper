@@ -1,8 +1,12 @@
-from typing import Optional
+from typing import Optional, List, Tuple
+from openai.types.chat import ChatCompletion
 from .EndPoint import EndPoint
-from .message.Message import Message, TextContent
+from .message.Message import Message, get_assistant_message_from_response
 from .message.MessageList import MessageList
 from .message.SubstitutionDict import SubstitutionDict
+from .utils import get_logger
+
+logger = get_logger(__name__)
 
 
 class ChatCompletion(EndPoint):
@@ -36,29 +40,39 @@ class ChatCompletion(EndPoint):
 
     def completions(
         self,
-        messages: MessageList,
+        message_list: MessageList,
         substitution_dict: Optional[SubstitutionDict] = None,
         model: Optional[str] = None,
+        store: bool = False,
         **kwargs,
-    ) -> Message:
+    ) -> Tuple[List[Message], ChatCompletion]:
         """
-        Generate chat completions using the provided messages and optional substitutions.
+        Generate chat completions using the provided message_list and optional substitutions.
 
         Args:
-            messages (MessageList): The list of messages to use for generating completions.
+            message_list (MessageList): The list of messages to use for generating completions.
             substitution_dict (Optional[SubstitutionDict]): A dictionary for substituting variables in messages (optional).
             model (Optional[str]): The model to use for generating completions. Defaults to the instance's default model if not provided.
+            store (bool): Whether to store the chat completion in the database. Defaults to False.
             **kwargs: Additional arguments to pass to the chat completions API.
 
         Returns:
             Message: The generated chat completion.
         """
+        if "stream" in kwargs:
+            logger.warning(
+                "The 'stream' parameter is not supported in the 'completions' method"
+            )
+            del kwargs["stream"]
         if model is None:
             model = self._default_model
-        response = self._client.chat.completions.create(
-            model=model, messages=messages.to_dict(substitution_dict), **kwargs
+        res: ChatCompletion = self._client.chat.completions.create(
+            model=model,
+            messages=message_list.to_dict(substitution_dict),
+            store=store,
+            **kwargs,
         )
-        return Message(
-            response.choices[0].message.role,
-            [TextContent(response.choices[0].message.content)],
-        )
+        responses = []
+        for choice in res.choices:
+            responses.append(get_assistant_message_from_response(choice))
+        return responses, res

@@ -239,13 +239,13 @@ class ToolMessage(Message):
         return f"\033[34m{heading}\033[0m{content}"
 
 
-def get_assistant_message_from_dict(message_dict: Dict) -> AssistantMessage:
-    """Get an AssistantMessage object from a dictionary.
+def get_assistant_message_from_response(message_dict: Dict) -> Message:
+    """generate a Message object from a dictionary.
 
     Args:
         message_dict (Dict): The dictionary representation of the assistant message.
 
     Returns:
-        AssistantMessage: The AssistantMessage object.
+        Message: The AssistantMessage object.
     """
     # TODO

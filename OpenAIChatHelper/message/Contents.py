@@ -1,6 +1,6 @@
 from typing import Dict, Optional, Literal, List
 from .SubstitutionDict import SubstitutionDict
-from ..utils.StringOperations import remove_markdown, split_ordered_list
+from ..utils import remove_markdown, split_ordered_list
 
 
 class Content:
