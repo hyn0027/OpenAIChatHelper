@@ -1,82 +1,129 @@
-import re
-from typing import Optional, List
+from typing import List, Iterable
+from markdown_it import MarkdownIt
+from mdformat.renderer import MDRenderer
+
+from .Logging import get_logger
+
+logger = get_logger(__name__)
 
 
 def remove_markdown(
-    text,
-    bold_and_italic: Optional[bool] = True,
-    headers: Optional[bool] = True,
-    horizontal_rules: Optional[bool] = True,
-    blockquotes: Optional[bool] = True,
-    strikethrough: Optional[bool] = True,
-    extra_whitespace: Optional[bool] = True,
+    text: str,
+    remove_types: Iterable[str] = [
+        "heading",
+        "emphasis",
+        "strong",
+        "horizontal_rule",
+        "block_quote",
+    ],
 ) -> str:
-    """
-    Remove markdown formatting from the provided text.
+    """Remove markdown formatting from the text content.
 
     Args:
-        text: The text to remove markdown formatting from.
-        bold_and_italic (Optional[bool]): Whether to remove bold and italic formatting.
-        headers (Optional[bool]): Whether to remove headers.
-        horizontal_rules (Optional[bool]): Whether to remove horizontal rules.
-        blockquotes (Optional[bool]): Whether to remove blockquotes.
-        strikethrough (Optional[bool]): Whether to remove strikethrough.
-        extra_whitespace (Optional[bool]): Whether to remove extra whitespace.
+        text (str): The text content.
+        remove_types (Iterable[str], optional): The type of format to be removed. Defaults to [ "heading", "emphasis", "strong", "horizontal_rule", "block_quote", ].
 
     Returns:
-        str: The text with markdown formatting removed.
+        str: The text content without markdown formatting.
     """
-    # Remove bold and italic formatting
-    if bold_and_italic:
-        text = re.sub(r"(\*\*|__)(.*?)\1", r"\2", text)
-        text = re.sub(r"(\*|_)(.*?)\1", r"\2", text)
-    # Remove headers
-    if headers:
-        text = re.sub(r"^\#{1,6}\s*(.*)", r"\1", text, flags=re.MULTILINE)
-    # Remove horizontal rules
-    if horizontal_rules:
-        text = re.sub(
-            r"^(\s*\-{3,}\s*|\s*\*{3,}\s*|\s*_{3,}\s*)$", "", text, flags=re.MULTILINE
-        )
-    # Remove blockquotes
-    if blockquotes:
-        text = re.sub(r"^\>+\s*(.*)", r"\1", text, flags=re.MULTILINE)
-    # Remove strikethrough
-    if strikethrough:
-        text = re.sub(r"~~(.*?)~~", r"\1", text)
-    # Remove extra whitespace
-    if extra_whitespace:
-        text = re.sub(r"\n{2,}", "\n\n", text).strip()
-    return text
+    markdown_match = {
+        "heading": ["heading_open", "heading_close"],
+        "emphasis": ["em_open", "em_close"],
+        "strong": ["strong_open", "strong_close"],
+        "horizontal_rule": ["hr"],
+        "block_quote": ["blockquote_open", "blockquote_close"],
+    }
+    for remove_type in remove_types:
+        if remove_type not in markdown_match:
+            raise ValueError(
+                f"Invalid remove type: {remove_type}, must be one of {list(markdown_match.keys())}"
+            )
+
+    try:
+
+        def traverse_ast_tree(node):
+            for remove_type in remove_types:
+                if node.type in markdown_match[remove_type]:
+                    return None
+            new_children = []
+            if node.children:
+                for child in node.children:
+                    new_child = traverse_ast_tree(child)
+                    if new_child:
+                        new_children.append(new_child)
+            node.children = new_children
+            return node
+
+        md = MarkdownIt()
+        tokens = []
+        for token in md.parse(text):
+            new_token = traverse_ast_tree(token)
+            if new_token:
+                tokens.append(new_token)
+
+        renderer = MDRenderer()
+        output_markdown = renderer.render(tokens, {}, {})
+        return output_markdown
+    except Exception as e:
+        logger.error(f"Error removing markdown: {e}")
+        return text
 
 
 def split_ordered_list(
-    text: str, remove_markdown_option: Optional[bool] = True, **kwargs
+    text: str,
+    remove_markdown_types=[
+        "heading",
+        "emphasis",
+        "strong",
+        "horizontal_rule",
+        "block_quote",
+    ],
+    **kwargs,
 ) -> List[str]:
-    """
-    Split the text content into an ordered list.
+    text = remove_markdown(text, remove_markdown_types, **kwargs)
 
-    Args:
-        remove_markdown_option (Optional[bool]): Whether to remove markdown formatting from the text content.
-        **kwargs: Additional arguments to pass to the remove_markdown function.
+    try:
+        order_list_count = 0
+        order_list_open_idx = -1
+        order_list_close_idx = -1
 
-    Returns:
-        List[str]: The ordered list of text items.
-    """
-    if remove_markdown_option:
-        text = remove_markdown(text, **kwargs)
-    current_number = 1
-    ordered_list = []
-    current_string = ""
-    for line in text.split("\n"):
-        line = line.strip()
-        if line.startswith(str(current_number) + ". "):
-            ordered_list.append(current_string)
-            current_string = line.replace(str(current_number) + ". ", "").strip()
-            current_number += 1
-        else:
-            current_string += "\n" + line
-    if current_string:
-        ordered_list.append(current_string)
-    ordered_list = [item for item in ordered_list if item != ""]
-    return ordered_list
+        md = MarkdownIt()
+        tokens = md.parse(text)
+        for idx, token in enumerate(tokens):
+            if token.type == "ordered_list_open":
+                order_list_count += 1
+                if order_list_open_idx == -1:
+                    order_list_open_idx = idx
+            if token.type == "ordered_list_close":
+                order_list_count -= 1
+                if order_list_count == 0:
+                    order_list_close_idx = idx
+                    break
+
+        tokens = tokens[order_list_open_idx : order_list_close_idx + 1]
+
+        res = []
+        renderer = MDRenderer()
+
+        list_item_count = 0
+        list_item_open_idx = -1
+        for idx, token in enumerate(tokens):
+            if token.type == "list_item_open":
+                list_item_count += 1
+                if list_item_open_idx == -1:
+                    list_item_open_idx = idx
+            if token.type == "list_item_close":
+                list_item_count -= 1
+                if list_item_count == 0:
+                    list_item_close_idx = idx
+                    res.append(
+                        renderer.render(
+                            tokens[list_item_open_idx + 1 : list_item_close_idx], {}, {}
+                        )
+                    )
+                    list_item_open_idx = -1
+
+        return res
+    except Exception as e:
+        logger.error(f"Error splitting ordered list: {e}")
+        return [text]

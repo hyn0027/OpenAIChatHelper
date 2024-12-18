@@ -1,5 +1,7 @@
-from . import StringOperations
-
-for name in dir(StringOperations):
-    if not name.startswith("__"):
-        globals()[name] = getattr(StringOperations, name)
+from .StringOperations import *
+from .Logging import (
+    disable_all_loggers,
+    enable_all_loggers,
+    set_all_loggers_levels,
+    set_default_logging_level,
+)

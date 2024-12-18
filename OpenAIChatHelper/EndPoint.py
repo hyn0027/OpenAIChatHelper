@@ -2,7 +2,7 @@ import os
 from typing import Optional
 from openai import OpenAI
 
-from .utils.Logging import get_logger
+from .utils import get_logger
 
 logger = get_logger(__name__)
 
