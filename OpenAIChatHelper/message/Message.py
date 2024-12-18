@@ -237,3 +237,15 @@ class ToolMessage(Message):
         content = "\n".join(str(item) for item in self._content)
         content = content.replace("\n", "\n" + " " * len(heading))
         return f"\033[34m{heading}\033[0m{content}"
+
+
+def get_assistant_message_from_dict(message_dict: Dict) -> AssistantMessage:
+    """Get an AssistantMessage object from a dictionary.
+
+    Args:
+        message_dict (Dict): The dictionary representation of the assistant message.
+
+    Returns:
+        AssistantMessage: The AssistantMessage object.
+    """
+    # TODO
