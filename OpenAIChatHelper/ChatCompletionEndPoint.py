@@ -74,5 +74,5 @@ class ChatCompletionEndPoint(EndPoint):
         )
         responses = []
         for choice in res.choices:
-            responses.append(get_assistant_message_from_response(choice))
+            responses.append(get_assistant_message_from_response(choice.message))
         return responses, res
