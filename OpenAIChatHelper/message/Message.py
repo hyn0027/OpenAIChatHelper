@@ -1,4 +1,5 @@
 from typing import Dict, Optional, Literal, List, Union
+from openai.types.chat.chat_completion_message import ChatCompletionMessage
 from .SubstitutionDict import SubstitutionDict
 from .Contents import Content, RefusalContent, TextContent
 from .ToolCall import ToolCall, get_tool_call_from_dict
@@ -195,6 +196,23 @@ class AssistantMessage(Message):
             ]
         return message_dict
 
+    def __repr__(self) -> str:
+        heading = f"{self._role} ({self._name}): " if self._name else f"{self._role}: "
+        if self._content:
+            content = "\n".join(str(item) for item in self._content)
+        else:
+            content = ""
+        if self._refusal:
+            content += f"\nRefusal: {self._refusal}"
+        if self._audio:
+            content += f"\nAudio: {self._audio['id']}"
+        if self._tool_calls:
+            content += "\n".join(str(item) for item in self._tool_calls)
+            
+        content = content.replace("\n", "\n" + " " * len(heading))
+            
+        return f"\033[34m{heading}\033[0m{content}"
+
 
 class ToolMessage(Message):
     """The message class for tool messages"""
@@ -239,35 +257,30 @@ class ToolMessage(Message):
         return f"\033[34m{heading}\033[0m{content}"
 
 
-def get_assistant_message_from_response(message_dict: Dict) -> Message:
+def get_assistant_message_from_response(message_dict: ChatCompletionMessage) -> Message:
     """generate a Message object from a dictionary.
 
     Args:
-        message_dict (Dict): The dictionary representation of the assistant message.
+        message_dict (ChatCompletionMessage): The dictionary representation of the assistant message.
 
     Returns:
         Message: The AssistantMessage object.
     """
-    role = message_dict.get("role")
+    role = message_dict.role
     if role == "assistant":
-        content = message_dict.get("content")
+        content = message_dict.content
         content = TextContent(content) if content else None
-        refusal = message_dict.get("refusal")
-        audio = message_dict.get("audio")
-        tool_calls = message_dict.get("tool_calls")
+        refusal = message_dict.refusal
+        audio = message_dict.audio
+        tool_calls = message_dict.tool_calls
         tool_calls = (
             [get_tool_call_from_dict(item) for item in tool_calls]
             if tool_calls
             else None
         )
         return AssistantMessage(content, refusal, None, audio, tool_calls)
-    elif role == "tool":
-        content = TextContent(message_dict.get("content"))
-        tool_call_id = message_dict.get("tool_call_id")
-        return ToolMessage(content, tool_call_id)
     elif role == "user" or role == "system" or role == "developer":
-        content = TextContent(message_dict.get("content"))
-        name = message_dict.get("name")
-        return DevSysUserMessage(role, content, name)
+        content = TextContent(message_dict.content)
+        return DevSysUserMessage(role, content)
     else:
         raise ValueError(f"Invalid role: {role}")
