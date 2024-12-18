@@ -1,4 +1,4 @@
-from .Contents import *
+from .message import *
 
 # from .Message import *
 

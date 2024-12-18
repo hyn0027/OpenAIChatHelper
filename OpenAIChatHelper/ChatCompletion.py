@@ -1,8 +1,8 @@
 from typing import Optional
 from .EndPoint import EndPoint
-from .Message import Message, TextContent
-from .MessageList import MessageList
-from .SubstitutionDict import SubstitutionDict
+from .message.Message import Message, TextContent
+from .message.MessageList import MessageList
+from .message.SubstitutionDict import SubstitutionDict
 
 
 class ChatCompletion(EndPoint):

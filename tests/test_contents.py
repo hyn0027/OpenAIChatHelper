@@ -1,5 +1,5 @@
 import pytest
-from OpenAIChatHelper import Content, TextContent, ImageContent, AudioContent
+from OpenAIChatHelper.message import Content, TextContent
 
 
 def test_general_content():

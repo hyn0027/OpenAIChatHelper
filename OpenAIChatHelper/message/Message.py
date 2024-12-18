@@ -15,6 +15,14 @@ class Message:
         self._name = name
         self._content = None
 
+    @property
+    def role(self) -> str:
+        return self._role
+
+    @property
+    def name(self) -> Optional[str]:
+        return self._name
+
     def to_dict(
         self, substitution_dict: Optional[SubstitutionDict] = SubstitutionDict()
     ) -> Dict:
@@ -118,6 +126,19 @@ class DevSysUserMessage(Message):
 
 
 class AssistantMessage(Message):
-    def __init__(self, name: Optional[str] = None):
+    def __init__(
+        self,
+        content,
+        refusal: Optional[str] = None,
+        name: Optional[str] = None,
+        audio: Optional[Union[Dict, str]] = None,
+        tool_calls: Optional[List] = None,
+    ):
         super().__init__("assistant", name)
+        # TODO
+
+
+class ToolMessage(Message):
+    def __init__(self):
+        super().__init__("tool")
         # TODO
