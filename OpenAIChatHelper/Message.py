@@ -6,6 +6,15 @@ from .Contents import Content
 class Message:
     """Abstract base class for different types of messages."""
 
+    def __init__(self, role: str, name: Optional[str] = None):
+        if role not in {"user", "system", "assistant", "developer", "tool"}:
+            raise ValueError(
+                f"Invalid role: {role}, must be one of 'user', 'system', 'assistant', 'developer', or 'tool'"
+            )
+        self._role = role
+        self._name = name
+        self._content = None
+
     def to_dict(
         self, substitution_dict: Optional[SubstitutionDict] = SubstitutionDict()
     ) -> Dict:
@@ -25,12 +34,12 @@ class Message:
         raise NotImplementedError
 
 
-class SystemAndUserMessage(Message):
-    """The message class for system and user messages."""
+class DevSysUserMessage(Message):
+    """The message class for developer, system and user messages."""
 
     def __init__(
         self,
-        role: Literal["user", "system"],
+        role: Literal["user", "system", "developer"],
         content: Union[Content, List[Content]],
         name: Optional[str] = None,
     ):
@@ -38,20 +47,19 @@ class SystemAndUserMessage(Message):
         Initialize a Message object.
 
         Args:
-            role (Literal["user", "system"]): The role of the sender.
+            role (Literal["user", "system", "developer"]): The role of the sender.
             content (Union[Content, List[Content]]): The content of the message.
             name (Optional[str]): The name of the sender (if applicable).
 
         Raises:
             ValueError: If `role` is invalid, `content` is empty, or name is not a string.
         """
-        if role not in {"user", "system"}:
+        if role not in {"user", "system", "developer"}:
             raise ValueError(f"Invalid role: {role}")
         if not isinstance(name, str) and name is not None:
             raise ValueError("name must be a string")
 
-        self._role = role
-        self._name = name
+        super.__init__(role, name)
 
         if not content:
             raise ValueError("Message must have content")
@@ -62,10 +70,10 @@ class SystemAndUserMessage(Message):
         for item in content:
             if not isinstance(item, Content):
                 raise ValueError("Content items must be Content objects")
-        if role == "system":
+        if role == "system" or role == "developer":
             if len(content) != 1 or content[0].content_type != "text":
                 raise ValueError(
-                    "System messages must have exactly one text content item"
+                    "System and developer messages must have exactly one text content item"
                 )
 
         self._content = content
@@ -110,4 +118,6 @@ class SystemAndUserMessage(Message):
 
 
 class AssistantMessage(Message):
-    pass
+    def __init__(self, name: Optional[str] = None):
+        super().__init__("assistant", name)
+        # TODO
