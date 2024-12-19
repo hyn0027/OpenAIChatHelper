@@ -63,13 +63,21 @@ class TextContent(Content):
         return f"\033[36mText:\033[0m {self._text}".replace("\n", "\n" + " " * 6)
 
     def split_ordered_list(
-        self, remove_markdown_option: Optional[bool] = True, **kwargs
+        self,
+        remove_markdown_option: List = [
+            "heading",
+            "emphasis",
+            "strong",
+            "horizontal_rule",
+            "block_quote",
+        ],
+        **kwargs,
     ) -> List[str]:
         """
         Split the text content into an ordered list.
 
         Args:
-            remove_markdown (Optional[bool]): Whether to remove markdown formatting from the text content.
+            remove_markdown (List): Whether to remove markdown formatting from the text content.
             **kwargs: Additional arguments to pass to the `split_ordered_list` function.
 
         Returns:
