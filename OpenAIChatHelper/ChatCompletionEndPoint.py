@@ -47,7 +47,7 @@ class ChatCompletionEndPoint(EndPoint):
         **kwargs,
     ) -> Tuple[List[Message], ChatCompletion]:
         """
-        Generate chat completions using the provided message_list and optional substitutions.
+        Generate chat completions using the provided message_list and optional substitutions. The completions are generated without streaming.
 
         Args:
             message_list (MessageList): The list of messages to use for generating completions.
