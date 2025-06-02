@@ -208,9 +208,9 @@ class AssistantMessage(Message):
             content += f"\nAudio: {self._audio['id']}"
         if self._tool_calls:
             content += "\n".join(str(item) for item in self._tool_calls)
-            
+
         content = content.replace("\n", "\n" + " " * len(heading))
-            
+
         return f"\033[34m{heading}\033[0m{content}"
 
 
