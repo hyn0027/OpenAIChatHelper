@@ -95,33 +95,35 @@ print("-" * 40)
 
 # sometimes you want to replace "variables" in messages and do not want to modify the original message list
 
+# Remove the last 3 messages (2 user messages and 1 assistant reply) from the list.
+# We retain only the original system prompt.
 message_list.pop_messages(3)
 
 print("Message List after popping last 3 messages (so there's only the system prompt):")
 print(message_list)
-
 print("-" * 40)
 
+# Add a message with a placeholder (user's review) to demonstrate variable substitution
 message_list.add_message(
     DevSysUserMessage(
         "user",
-        TextContent("{user's review}"),
+        TextContent("Review:\n{user's review}"),
     )
 )
 
+# Create a dictionary of substitutions
 substitution_dict = SubstitutionDict()
-
 substitution_dict["user's review"] = "I love this place!"
 
 print("Message List before substitution:")
 print(message_list)
-
 print("-" * 40)
 
+# Preview what the message list looks like after applying substitutions
 print("Substituting variables in the message list...")
 print(
     message_list.to_dict(substitution_dict)
-)  # just for illustration, this will not modify the original message_list
+)  # Note: this returns a substituted version; it does not mutate the original list; you do not need to call this method unless you want to see the substituted version
 print("-" * 40)
 
 # Use message list with subtitution_dict to get a response
@@ -137,9 +139,10 @@ print("-" * 40)
 
 ############### Other tools and utilities ###############
 
-
+# Create a new message list for a different task
 message_list = MessageList()
 
+# Add a user's prompt to the message list
 message_list.add_message(
     DevSysUserMessage(
         "user",
@@ -147,11 +150,13 @@ message_list.add_message(
     )
 )
 
+# Get a response from the chatbot
 responses, meta = chatbot.completions(message_list, temperature=1.0, n=1)
 
 response = responses[0][0]
 
 if isinstance(response, TextContent):
+    # the response is likely a list of reasons
     print("Response:")
     print(response)
 
