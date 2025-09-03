@@ -1,4 +1,5 @@
 from typing import Optional, List, Tuple
+import time
 from openai.types.chat import ChatCompletion
 from .EndPoint import EndPoint
 from .message.Message import Message, get_assistant_message_from_response
@@ -44,6 +45,7 @@ class ChatCompletionEndPoint(EndPoint):
         substitution_dict: Optional[SubstitutionDict] = None,
         model: Optional[str] = None,
         store: bool = False,
+        retry: int = 5,
         **kwargs,
     ) -> Tuple[List[Message], ChatCompletion]:
         """
@@ -54,6 +56,7 @@ class ChatCompletionEndPoint(EndPoint):
             substitution_dict (Optional[SubstitutionDict]): A dictionary for substituting variables in messages (optional).
             model (Optional[str]): The model to use for generating completions. Defaults to the instance's default model if not provided.
             store (bool): Whether to store the chat completion in the database. Defaults to False.
+            retry (int): The number of retry attempts for the API call. Defaults to 5.
             **kwargs: Additional arguments to pass to the chat completions API.
 
         Returns:
@@ -66,13 +69,22 @@ class ChatCompletionEndPoint(EndPoint):
             del kwargs["stream"]
         if model is None:
             model = self._default_model
-        res: ChatCompletion = self._client.chat.completions.create(
-            model=model,
-            messages=message_list.to_dict(substitution_dict),
-            store=store,
-            **kwargs,
-        )
-        responses = []
-        for choice in res.choices:
-            responses.append(get_assistant_message_from_response(choice.message))
-        return responses, res
+        for attempt in range(retry):
+            try:
+                res: ChatCompletion = self._client.chat.completions.create(
+                    model=model,
+                    messages=message_list.to_dict(substitution_dict),
+                    store=store,
+                    **kwargs,
+                )
+                responses = []
+                for choice in res.choices:
+                    responses.append(
+                        get_assistant_message_from_response(choice.message)
+                    )
+                return responses, res
+            except Exception as e:
+                logger.error(f"Attempt {attempt + 1} failed with error: {e}")
+                time.sleep(2**attempt)
+                if attempt == retry - 1:
+                    raise
