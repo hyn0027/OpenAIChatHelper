@@ -1,5 +1,6 @@
 from typing import Optional, List, Tuple
-import time
+import random
+import asyncio
 from openai.types.chat import ChatCompletion
 from .EndPoint import EndPoint
 from .message.Message import Message, get_assistant_message_from_response
@@ -39,7 +40,7 @@ class ChatCompletionEndPoint(EndPoint):
         super().__init__(organization, project_id)
         self._default_model = default_model
 
-    def completions(
+    async def completions(
         self,
         message_list: MessageList,
         substitution_dict: Optional[SubstitutionDict] = None,
@@ -69,22 +70,37 @@ class ChatCompletionEndPoint(EndPoint):
             del kwargs["stream"]
         if model is None:
             model = self._default_model
-        for attempt in range(retry):
+
+        async def _call():
+            # Offload blocking SDK call to a thread
+            return await asyncio.to_thread(
+                self._client.chat.completions.create,
+                model=model,
+                messages=message_list.to_dict(substitution_dict),
+                store=store,
+                **kwargs,
+            )
+
+        last_exc = None
+
+        for attempt in range(1, retry + 1):
             try:
-                res: ChatCompletion = self._client.chat.completions.create(
-                    model=model,
-                    messages=message_list.to_dict(substitution_dict),
-                    store=store,
-                    **kwargs,
-                )
-                responses = []
-                for choice in res.choices:
-                    responses.append(
-                        get_assistant_message_from_response(choice.message)
-                    )
+                res: ChatCompletion = await _call()
+                choices = getattr(res, "choices", None) or []
+                if not choices:
+                    raise RuntimeError("No choices returned from completion API.")
+                responses = [
+                    get_assistant_message_from_response(c.message) for c in choices
+                ]
                 return responses, res
             except Exception as e:
-                logger.error(f"Attempt {attempt + 1} failed with error: {e}")
-                time.sleep(2**attempt)
-                if attempt == retry - 1:
+                last_exc = e
+                # decide if error is retryable; if not, raise immediately
+                # if not is_retryable(e): raise
+                if attempt == retry:
                     raise
+                # exponential backoff with jitter
+                base = 2 ** (attempt - 1)
+                delay = base + random.uniform(-0.2 * base, 0.2 * base)
+                await asyncio.sleep(max(0.0, delay))
+            raise last_exc
