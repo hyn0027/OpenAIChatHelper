@@ -6,6 +6,7 @@ from OpenAIChatHelper.message import (
     AssistantMessage,
     TextContent,
 )
+import asyncio
 
 ###################### Create a ChatCompletionEndPoint instance ######################
 
@@ -45,8 +46,8 @@ print(message_list)  # directly printable
 print("-" * 40)
 
 # Generate 2 model completions with temperature 1.0
-responses, meta = chatbot.completions(
-    message_list, temperature=1.0, n=2
+responses, meta = asyncio.run(
+    chatbot.completions(message_list, temperature=1.0, n=2)
 )  # also accepts all kwargs supported by OpenAI API
 
 # meta is the original ChatCompletion object, which contains metadata about the request
@@ -83,7 +84,9 @@ print(message_list)
 print("-" * 40)
 
 # Get another model response
-new_responses, meta = chatbot.completions(message_list, temperature=1.0, n=1)
+new_responses, meta = asyncio.run(
+    chatbot.completions(message_list, temperature=1.0, n=1)
+)
 
 print("Response to the updated message list:")
 print(new_responses[0])  # Print the new response
@@ -127,8 +130,10 @@ print(
 print("-" * 40)
 
 # Use message list with subtitution_dict to get a response
-responses, meta = chatbot.completions(
-    message_list, substitution_dict=substitution_dict, temperature=1.0, n=1
+responses, meta = asyncio.run(
+    chatbot.completions(
+        message_list, substitution_dict=substitution_dict, temperature=1.0, n=1
+    )
 )
 
 print("Response after substitution:")
@@ -151,7 +156,7 @@ message_list.add_message(
 )
 
 # Get a response from the chatbot
-responses, meta = chatbot.completions(message_list, temperature=1.0, n=1)
+responses, meta = asyncio.run(chatbot.completions(message_list, temperature=1.0, n=1))
 
 response = responses[0][0]
 
