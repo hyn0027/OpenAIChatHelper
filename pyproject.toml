@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "OpenAIChatHelper"
-version = "0.1.0-alpha"
+version = "0.1.0"
 description = "A helper package for OpenAI API"
 authors = [{ name = "Yining Hong", email = "yhong3@andrew.cmu.edu" }]
 requires-python = ">=3.7"
