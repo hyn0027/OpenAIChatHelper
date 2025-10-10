@@ -18,8 +18,8 @@ classifiers = [
 dependencies = ["openai>=1.0.0", "markdown-it-py>=3.0.0", "mdformat>=0.7.0"]
 
 [project.urls]
-Homepage = "https://github.com/<you>/<repo>"
-Issues = "https://github.com/<you>/<repo>/issues"
+Homepage = "https://github.com/hyn0027/OpenAIChatHelper"
+Issues = "https://github.com/hyn0027/OpenAIChatHelper/issues"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/OpenAIChatHelper"]
