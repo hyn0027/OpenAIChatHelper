@@ -3,7 +3,7 @@ requires = ["hatchling>=1.25", "hatch-vcs>=0.4"]
 build-backend = "hatchling.build"
 
 [project]
-name = "openai-chat-helper"
+name = "OpenAIChatHelper"
 dynamic = ["version"]
 description = "A helper package for OpenAI API"
 readme = "README.md"
@@ -22,7 +22,7 @@ Homepage = "https://github.com/<you>/<repo>"
 Issues = "https://github.com/<you>/<repo>/issues"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/openai_chat_helper"]
+packages = ["src/OpenAIChatHelper"]
 
 [tool.hatch.build]
 include = ["/src", "/README.md", "/LICENSE"]
