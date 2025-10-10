@@ -3,7 +3,7 @@ name: publish
 on:
   push:
     tags:
-      - "v0.1.0"
+      - "v*"
 
 jobs:
   build-and-publish:
