@@ -2,25 +2,39 @@
 
 Getting annoyed at managing complicated and long prompts and doing substitutions. So creating this helper to make things easier.
 
+## 🚀 Installation
 
-## Installation
+### 1. Set up your API key
 
-First, obtain your OpenAI API key from [OpenAI API Keys](https://platform.openai.com/settings/organization/api-keys).
+Get your OpenAI API key from [OpenAI API Keys](https://platform.openai.com/settings/organization/api-keys).
 
-Then, export your API key as an environment variable:
+Then, export it as an environment variable:
 
 ```bash
 export OPENAI_API_KEY="YOUR_API_KEY_HERE"
 ```
 
-To avoid repeating this every session, add the line to your `~/.bashrc` or `~/.zshrc`.
+To make this persistent, add the above line to your shell configuration file (`~/.bashrc`, `~/.zshrc`, etc.).
 
-Install the package locally:
+
+### 2. Install the package
+
+From [PyPI](https://pypi.org/project/OpenAIChatHelper/):
+
+```bash
+pip install OpenAIChatHelper
+```
+
+Or, to install locally from source:
 
 ```bash
 pip install ./
 ```
 
-## Usage
+## 💡 Usage
 
-See `example_usage.py`.
+Check out the example script:
+
+```bash
+python example_usage.py
+```
